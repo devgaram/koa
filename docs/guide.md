@@ -1,12 +1,13 @@
 
-# Guide
+# 가이드
 
-  This guide covers Koa topics that are not directly API related, such as best practices for writing middleware and application structure suggestions. In these examples we use async functions as middleware - you can also use commonFunction or generatorFunction which will be a little different.
+이 가이드는 미들웨어 사용법과 애플리케이션 구조에 대해서 다룬다.
+예제의 미들웨어에서는 async 함수를 사용한다. 물론 commonFunction 또는 generatorFunction을 사용할 수도 있다.
 
-## Table of Contents
+## 목차
 
-- [Writing Middleware](#writing-middleware)
-- [Middleware Best Practices](#middleware-best-practices)
+- [미들웨어 사용법](#미들웨어 사용법)
+- [미들웨어 표준 사용법](#미들웨어 표준 사용법)
   - [Middleware options](#middleware-options)
   - [Named middleware](#named-middleware)
   - [Combining multiple middleware with koa-compose](#combining-multiple-middleware-with-koa-compose)
@@ -14,13 +15,11 @@
 - [Async operations](#async-operations)
 - [Debugging Koa](#debugging-koa)
 
-## Writing Middleware
+## 미들웨어 사용법
 
-  Koa middleware are simple functions which return a `MiddlewareFunction` with signature (ctx, next). When
-  the middleware is run, it must manually invoke `next()` to run the "downstream" middleware.
+  Koa 미들웨어는 (ctx, next) 같은 파라미터를 가진 `MiddlewareFunction` 반환하는 간단한 함수다. 미들웨어가 동작할 때, 반드시 `next()` 를 통해 다음 미들웨어로 갈 수 있다. 
 
-  For example if you wanted to track how long it takes for a request to propagate through Koa by adding an
-  `X-Response-Time` header field the middleware would look like the following:
+만약 Koa를 통해 전파되는 request 소요 시간을 추적하고 싶다면 다음과 같이 `X-Response-Time`  헤더에 시간을 셋팅하면 된다.
 
 ```js
 async function responseTime(ctx, next) {
@@ -33,39 +32,32 @@ async function responseTime(ctx, next) {
 app.use(responseTime);
 ```
 
-  If you're a front-end developer you can think any code before `next();` as the "capture" phase,
-  while any code after is the "bubble" phase. This crude gif illustrates how async function allow us
-  to properly utilize stack flow to implement request and response flows:
+프론트엔드 개발자는 `next()` 전의 코드를 "capture" 단계로 `next()` 후의 코드를 "bubble" 단계로 생각할 수 있다.  아래의 이미지는 어떻게 async 함수로 request, reponse 구현을 스택 플로우로 활용할 수 있는 지 설명해준다.
 
 ![Koa middleware](/docs/middleware.gif)
 
-   1. Create a date to track response time
-   2. Await control to the next middleware
-   3. Create another date to track duration
-   4. Await control to the next middleware
-   5. Set the response body to "Hello World"
-   6. Calculate duration time
-   7. Output log line
-   8. Calculate response time
-   9. Set `X-Response-Time` header field
-   10. Hand off to Koa to handle the response
+   1. response time 생성
+   2. Await를 통해 다음 미들웨어로
+   3. 소요시간 계산을 위해 또 다른 time을 생성
+   4. Await를 통해 다음 미들웨어로
+   5. response body에 "Hello World" 셋팅
+   6. 소요시간 계산
+   7. 로그로 출력
+   8. 응답시간 계산
+   9. `X-Response-Time`  헤더 필드에 값 셋팅
+   10. Koa로 이동하여 response 전달 
 
- Next we'll look at the best practices for creating Koa middleware.
+이제 우리는 Koa 미들웨어를 생성하는 방법에 대해 알아볼 것이다.
 
-## Middleware Best Practices
+## 미들웨어 표준 사용법
 
-  This section covers middleware authoring best practices, such as middleware
-  accepting options, named middleware for debugging, among others.
+이 섹션은 미들웨어 옵션, 디버깅 등을 위한 미들웨어 사용 방법에 대해 다룬다.
 
-### Middleware options
+### 미들웨어 옵션들
 
-  When creating public middleware it's useful to conform to the convention of
-  wrapping the middleware in a function that accepts options, allowing users to
-  extend functionality. Even if your middleware accepts _no_ options, this is still
-  a good idea to keep things uniform.
+공용 미들웨어를 생성할 때 옵션을 허용하여 편리하게 함수를 확장하여 미들웨어를 랩핑할 수 있다.  미들웨어에서 옵션을 허용하지 않을 수도 있는 데, 이는 좋은 표준이기도 하다.
 
-  Here our contrived `logger` middleware accepts a `format` string for customization,
-  and returns the middleware itself:
+여기 `logger` 미들웨어는 커스텀을 위해 `format`을 이용하여 값을 셋팅 후 문자열로 리턴한다.
 
 ```js
 function logger(format) {
@@ -86,9 +78,9 @@ app.use(logger());
 app.use(logger(':method :url'));
 ```
 
-### Named middleware
+### 미들웨어 이름 지정
 
-  Naming middleware is optional, however it's useful for debugging purposes to assign a name.
+미들웨어의 이름을 지정하는 것은 선택사항이나 이름을 사용하면 디버깅 목적으로 사용할 때 유용하다.
 
 ```js
 function logger(format) {
