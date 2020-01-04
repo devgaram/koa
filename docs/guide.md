@@ -6,16 +6,16 @@
 
 ## 목차
 
-- [미들웨어 사용법](#미들웨어 사용법)
-- [미들웨어 표준 사용법](#미들웨어 표준 사용법)
-  - [Middleware options](#middleware-options)
-  - [Named middleware](#named-middleware)
-  - [Combining multiple middleware with koa-compose](#combining-multiple-middleware-with-koa-compose)
-  - [Response Middleware](#response-middleware)
+- [미들웨어 사용법](#미들웨어-사용법)
+- [미들웨어 표준 사용법](#미들웨어-표준-사용법)
+  - [미들웨어 옵션들](#미들웨어-옵션들)
+  - [미들웨어 이름 지정](#미들웨어-이름-지정)
+  - [koa-compose를 통해 다양한 미들웨어 조합하기](#koa-compose를-통해-다양한-미들웨어-조합하기)
+  - [미들웨어 Response](#미들웨어-Response)
 - [Async operations](#async-operations)
 - [Debugging Koa](#debugging-koa)
 
-## 미들웨어 사용법
+# 미들웨어 사용법
 
   Koa 미들웨어는 (ctx, next) 같은 파라미터를 가진 `MiddlewareFunction` 반환하는 간단한 함수다. 미들웨어가 동작할 때, 반드시 `next()` 를 통해 다음 미들웨어로 갈 수 있다. 
 
@@ -90,9 +90,9 @@ function logger(format) {
 }
 ```
 
-### Combining multiple middleware with koa-compose
+### koa-compose를 통해 다양한 미들웨어 조합하기
 
-  Sometimes you want to "compose" multiple middleware into a single middleware for easy re-use or exporting. You can use [koa-compose](https://github.com/koajs/compose)
+[koa-compose](https://github.com/koajs/compose) 를 사용하면 여러 개의 미들웨어를 조립하여 하나의 미들웨어로 사용할 수 있다. 미들웨어를 재사용하거나 export할 때 유리하다. 
 
 ```js
 const compose = require('koa-compose');
@@ -126,12 +126,10 @@ const all = compose([random, backwards, pi]);
 app.use(all);
 ```
 
-### Response Middleware
+### 미들웨어 Response
 
-  Middleware that decide to respond to a request and wish to bypass downstream middleware may
-  simply omit `next()`. Typically this will be in routing middleware, but this can be performed by
-  any. For example the following will respond with "two", however all three are executed, giving the
-  downstream "three" middleware a chance to manipulate the response.
+미들웨어는 요청에 대한 응답을 위해 `next()`를 생략할지도 모른다. 일반적으로 `next()`는 미들웨어의 라우팅을 결정하나 다음과 같은 작업을 한다.
+예를 들어 아래의 코드는 요청에 대해 "two"를 응답하나 3개의 미들웨어 모두 실행된다. 3개의 미들웨어에 response를 조작할 수 있는 기회가 주어지는 것이다.
 
 ```js
 app.use(async function (ctx, next) {
@@ -153,9 +151,8 @@ app.use(async function (ctx, next) {
   console.log('<< three');
 });
 ```
-
-  The following configuration omits `next()` in the second middleware, and will still respond
-  with "two", however the third (and any other downstream middleware) will be ignored:
+  
+  아래의 코드는 두번째 미들웨어에서 `next()`를 생략했고 response로 "two"를 셋팅하여 세번째 미들웨어는 무시될 것이다.
 
 ```js
 app.use(async function (ctx, next) {
@@ -177,15 +174,15 @@ app.use(async function (ctx, next) {
 });
 ```
 
-  When the furthest downstream middleware executes `next();`, it's really yielding to a noop
-  function, allowing the middleware to compose correctly anywhere in the stack.
+가장 마지막 미들웨어에서 `next()`를 실행하면 noop function, 아무 동작을 하지 않으며 미들웨어가 스택의 어느 곳에서나 올바르게 구성할 수 있다.
 
 ## Async operations
 
-  Async function and promise forms Koa's foundation, allowing
-  you to write non-blocking sequential code. For example this middleware reads the filenames from `./docs`,
-  and then reads the contents of each markdown file in parallel before assigning the body to the joint result.
+Async 함수와 promise 기반인 Koa는 non-blocking sequential code를 허용한다. 예를 들어 이 미들웨어는 `./docs` 디렉토리에서 파일 이름들을 읽어온 후  parallel, 병렬로 각각의 마크다운 파일 형태의 내용을 읽어 body에 결과를 join 하여 셋팅한다.
 
+> non-blocking이란, 어떤 쓰레드에서 오류가 발생하거나 멈추었을 때 다른 쓰레드에게 영향을 끼치지 않도록 만드는 방법들을 말한다.
+
+> parallel, 병렬이라는 뜻처럼 데이터를 한번에 여러 개를 전송한다
 
 ```js
 const fs = require('mz/fs');
@@ -199,7 +196,7 @@ app.use(async function (ctx, next) {
 });
 ```
 
-## Debugging Koa
+## Koa 디버깅하기
 
   Koa along with many of the libraries it's built with support the __DEBUG__ environment variable from [debug](https://github.com/visionmedia/debug) which provides simple conditional logging.
 
